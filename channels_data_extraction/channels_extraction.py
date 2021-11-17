@@ -60,8 +60,10 @@ def odometry_message_parser_callback(data, socket):
 	data_to_send = [data.header.timestamp_sec, data.header.sequence_num, data.localization.position.x, data.localization.position.y, data.localization.position.z]
 	data_to_send_str = 'odometry:'+','.join([str(x) for x in data_to_send])
 	socket.send_string(data_to_send_str, flags=zmq.NOBLOCK)
-	# print('data_to_send_str', data_to_send_str)
 
+	# odometry_record = 'odometry.txt'
+	# with open(odometry_record, 'a') as f_out:
+	# 	f_out.write(data_to_send_str+'\n')
 
 def perception_obstacles_callback(data, socket):
 	data_to_send = [data.header.timestamp_sec, data.header.sequence_num, len(data.perception_obstacle)]
@@ -72,17 +74,30 @@ def perception_obstacles_callback(data, socket):
 
 	data_to_send_str = 'perception_obstacles:'+','.join([str(x) for x in data_to_send])
 	socket.send_string(data_to_send_str, flags=zmq.NOBLOCK)
-	# print('data_to_send_str', data_to_send_str)
+
+	# perception_obstacles_record = 'perception_obstacles.txt'
+	# with open(perception_obstacles_record, 'a') as f_out:
+	# 	f_out.write(data_to_send_str+'\n')
+
 
 
 def front_camera_callback(data, socket):
-
 	data_to_send = [str(data.header.timestamp_sec).encode(), str(data.header.sequence_num).encode(), data.data]
 	data_to_send_str = b':data_delimiter:'.join(data_to_send)
 	socket.send(data_to_send_str, flags=zmq.NOBLOCK)
 
-	# socket.send(data.data, flags=zmq.NOBLOCK)
 
+	# timestamp_sec = data.header.timestamp_sec
+	# front_image = data.data
+	# sequence_num = data.header.sequence_num
+	# import os
+	# main_camera_folder = 'main_camera_folder'
+	# if not os.path.exists(main_camera_folder):
+	# 	os.mkdir(main_camera_folder)
+	# img_path = os.path.join(main_camera_folder, str(sequence_num)+'_'+str(timestamp_sec)+'.jpg')
+	#
+	# with open(img_path, 'wb') as f_out_front_camera:
+	#     f_out_front_camera.write(front_image)
 
 
 
@@ -106,6 +121,8 @@ if __name__=='__main__':
 	message_parser_node.create_reader("/apollo/perception/obstacles_gt", PerceptionObstacles, perception_obstacles_callback, socket_perception_obstacles)
 
 	message_parser_node.create_reader("/apollo/sensor/camera/front_6mm/image/compressed", CompressedImage, front_camera_callback, socket_front_camera)
+
+	# message_parser_node.create_reader("/apollo/sensor/camera/front_6mm/image/compressed", CompressedImage, front_camera_callback)
 
 	message_parser_node.spin()
 	cyber.shutdown()
