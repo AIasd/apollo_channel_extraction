@@ -108,10 +108,12 @@ if __name__=='__main__':
 	socket_odometry = context.socket(zmq.PAIR)
 	socket_perception_obstacles = context.socket(zmq.PAIR)
 	socket_front_camera = context.socket(zmq.PAIR)
+	socket_perception_obstacles_apollo = context.socket(zmq.PAIR)
 
 	socket_odometry.connect("tcp://" + docker_ip + ":5561")
 	socket_perception_obstacles.connect("tcp://" + docker_ip + ":5562")
 	socket_front_camera.connect("tcp://" + docker_ip + ":5563")
+	socket_perception_obstacles_apollo.connect("tcp://" + docker_ip + ":5564")
 
 
 	cyber.init()
@@ -119,8 +121,8 @@ if __name__=='__main__':
 
 	message_parser_node.create_reader("/apollo/sensor/gnss/odometry", Gps, odometry_message_parser_callback, socket_odometry)
 	message_parser_node.create_reader("/apollo/perception/obstacles_gt", PerceptionObstacles, perception_obstacles_callback, socket_perception_obstacles)
-
 	message_parser_node.create_reader("/apollo/sensor/camera/front_6mm/image/compressed", CompressedImage, front_camera_callback, socket_front_camera)
+	message_parser_node.create_reader("/apollo/perception/obstacles", PerceptionObstacles, perception_obstacles_callback, socket_perception_obstacles_apollo)
 
 	# message_parser_node.create_reader("/apollo/sensor/camera/front_6mm/image/compressed", CompressedImage, front_camera_callback)
 
@@ -130,4 +132,6 @@ if __name__=='__main__':
 
 	socket_odometry.close()
 	socket_perception_obstacles.close()
+	socket_front_camera.close()
+	socket_perception_obstacles_apollo.close()
 	context.term()
